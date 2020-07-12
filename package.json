@@ -7,8 +7,8 @@
   "author": "Marlon <marlon.bsousa@gmail.com>",
   "scripts": {
     "build": "yarn tsc -p tsconfig.json",
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "lint:fix": "eslint 'src/**/*.ts' 'test/**/*.ts' --fix",
+    "lint": "eslint \"{src, test}/**/*.ts\"",
+    "lint:fix": "eslint \"{src,test}/**/*.ts\"",
     "start": "node dist/index.js",
     "test": "yarn build && yarn lint && yarn test:unit && yarm test:component",
     "test:unit": "ts-mocha -r test-setup.ts './test/unit/**/**.test.ts --paths'",
