@@ -3,12 +3,12 @@ type HttpRequestBerbs = "GET" | "PATCH" | "POST" | "PUT";
 export interface RequestHeader {
     name: string;
     value: string;
-};
+}
 
 export interface RequestVar {
     name: string;
     value: string;
-};
+}
 
 export interface RequestParam {
     name: string;

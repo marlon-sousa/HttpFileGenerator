@@ -1,12 +1,12 @@
 import StringBuilder from "@tsdotnet/string-builder";
 import HttpRequest from "@src/entities/http-file";
-import { isPlainObject, isString } from "lodash";
+import { isPlainObject } from "lodash";
 
 type bodyType = "JSON" | "QUERY" | "RAW";
 
 const requestHeaderLine = "#####";
 
-const requireIsObject = (obj: any, message: string): void => {
+const requireIsObject = (obj: Record<string, any>, message: string): void => {
     if (!isPlainObject(obj)) {
         throw new Error(message);
     }
@@ -25,7 +25,7 @@ const getBodyType = (request: HttpRequest): bodyType => {
 const toUrlEncode = (body: any): string => {
     requireIsObject(body, "unable to convert body to urlencoded format");
     const buff = new StringBuilder();
-    for (let k in body) {
+    for (const k in body) {
         buff.append(`${k}=${body[k]}\n&`);
     }
     const result = buff.toString();
@@ -70,7 +70,7 @@ const getBody = (request: HttpRequest): string => {
 }
 
 export default (request: HttpRequest): string => {
-    let result = new StringBuilder(requestHeaderLine);
+    const result = new StringBuilder(requestHeaderLine);
     result.appendLine(getName(request))
         .append(request.verb, " ")
         .append(request.url, " HTTP/1.1")
