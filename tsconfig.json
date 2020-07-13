@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "target": "es2017",
+    "target": "ES2017",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitAny": false,
@@ -13,12 +13,8 @@
     "baseUrl": ".",
     "paths": {
       "@src/*": [
-        "src/*"
+        "./src/*"
       ]
-    }
-  },
-  "sourceMap": true,
-  "include": [
-    "src"
-  ]
+    },
+  }
 }

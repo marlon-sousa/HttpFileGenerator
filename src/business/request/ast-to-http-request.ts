@@ -47,20 +47,16 @@ const bodyConverters: Record<string, (body: any) => string> = {
 
 const getHeaderValue = (request: HttpRequest, headerName: string): string | undefined => request.headers.find(h => h.name === headerName)?.value;
 
-const getHeaders = (request: HttpRequest): Array<string> => request.headers.map(h => `${h.name}: {h.value}\n`);
+const getHeaders = (request: HttpRequest): string => request.headers.map(h => `${h.name}: ${h.value}`).join("\n");
 
 const getParams = (request: HttpRequest): string => {
-    let result = "";
-    if (request?.params.length > 0) {
-        const buff = new StringBuilder("?");
-        request.params.forEach(p => buff.append(`${p.name}=${p.value}\n&`));
-        const tmp = buff.toString();
-        result = tmp.endsWith("\n&") ? result.slice(0, -2) : tmp;
-    }
-    return result;
+    const params = request?.params?.map(p => `${p.name}=${p.value}`).join("\n&") || "";
+    return params.length > 0 ? `?${params}` : params;
 }
 
 const getName = (request: HttpRequest): string => `# @name ${request.name}`;
+
+const getURL = (request: HttpRequest): string => `${request.url} HTTP/1.1`;
 
 const getBody = (request: HttpRequest): string => {
     if (!request.body) {
@@ -69,14 +65,23 @@ const getBody = (request: HttpRequest): string => {
     return bodyConverters[getBodyType(request)](request.body);
 }
 
-export default (request: HttpRequest): string => {
+const toString = (request: HttpRequest): string => {
     const result = new StringBuilder(requestHeaderLine);
     result.appendLine(getName(request))
         .append(request.verb, " ")
-        .append(request.url, " HTTP/1.1")
+        .append(getURL(request))
         .appendLine(getParams(request))
         .appendLine(getHeaders(request))
         .appendLine()
         .appendLine(getBody(request));
     return result.toString()
+};
+
+export default {
+    getBody,
+    getHeaders,
+    getName,
+    getParams,
+    getURL,
+    toString,
 };

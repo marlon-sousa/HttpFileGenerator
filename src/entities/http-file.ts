@@ -16,7 +16,7 @@ export interface RequestParam {
 }
 
 export default interface HttpRequest {
-    body?: string;
+    body?: Object;
     headers: Array<RequestHeader>;
     name: string;
     params?: Array<RequestParam>;
