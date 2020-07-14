@@ -31,7 +31,7 @@ describe("ast to http request", () => {
             verb: "GET",
             url: "http://localhost",
         };
-        expect(request.getHeaders(file)).to.be.equal("");
+        expect(request.getHeaders(file)).to.be.equal("\n\n");
     })
 
     it("should return one header in the correct format", () => {
@@ -45,7 +45,7 @@ describe("ast to http request", () => {
             verb: "GET",
             url: "http://localhost",
         };
-        expect(request.getHeaders(file)).to.be.equal("content-type: application/JSON");
+        expect(request.getHeaders(file)).to.be.equal("content-type: application/JSON\n\n");
     });
 
     it("should return headers with correct format separated by line", () => {
@@ -62,7 +62,7 @@ describe("ast to http request", () => {
             verb: "GET",
             url: "http://localhost",
         };
-        expect(request.getHeaders(file)).to.be.equal("content-type: application/JSON\ncontent-length: 5");
+        expect(request.getHeaders(file)).to.be.equal("content-type: application/JSON\ncontent-length: 5\n\n");
     });
 
     it("should return no params", () => {
@@ -87,7 +87,7 @@ describe("ast to http request", () => {
             }],
             url: "http://localhost",
         };
-        expect(request.getParams(file)).to.be.equal("?parameter1=value1");
+        expect(request.getParams(file)).to.be.equal("?parameter1=value1\n");
     });
 
     it("should return multiple params", () => {
@@ -104,6 +104,66 @@ describe("ast to http request", () => {
             }],
             url: "http://localhost",
         };
-        expect(request.getParams(file)).to.be.equal("?parameter1=value1\n&parameter2=value2");
+        expect(request.getParams(file)).to.be.equal("?parameter1=value1\n&parameter2=value2\n");
+    });
+
+    it("should return body in JSON format", () => {
+        const file: httpFile = {
+            name: "test",
+            verb: "GET",
+            headers: [{
+                name: "Content-Type",
+                value: "application/json",
+            }],
+            body: {
+                parameter1: "value1",
+                parameter2: "value2",
+            },
+            url: "http://localhost",
+        };
+        expect(request.getBody(file)).to.be.equal(JSON.stringify(file.body));
+    });
+
+    it("should generate request without headers ", () => {
+        const expectedHttpRequest = `###### @name test\nGET http://localhost HTTP/1.1\n?parameter=value1\n&parameter2=value2\n\n\n`;
+        const file: httpFile = {
+            name: "test",
+            verb: "GET",
+            headers: [],
+            params: [{
+                name: "parameter",
+                value: "value1",
+            }, {
+                name: "parameter2",
+                value: "value2",
+            }],
+            url: "http://localhost",
+        };
+        expect(request.toString(file)).to.be.equal(expectedHttpRequest);
+    });
+
+    it("should generate full request", () => {
+        const expectedHttpRequest = `###### @name test\nGET http://localhost HTTP/1.1\n?parameter=value1\n&parameter2=value2\nContent-Type: application/json\n\n{"parameter1":"value1","parameter2":"value2"}`;
+        const file: httpFile = {
+            name: "test",
+            verb: "GET",
+            headers: [{
+                name: "Content-Type",
+                value: "application/json",
+            }],
+            params: [{
+                name: "parameter",
+                value: "value1",
+            }, {
+                name: "parameter2",
+                value: "value2",
+            }],
+            body: {
+                parameter1: "value1",
+                parameter2: "value2",
+            },
+            url: "http://localhost",
+        };
+        expect(request.toString(file)).to.be.equal(expectedHttpRequest);
     });
 });

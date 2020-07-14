@@ -2,9 +2,9 @@ import StringBuilder from "@tsdotnet/string-builder";
 import HttpRequest from "@src/entities/http-file";
 import { isPlainObject } from "lodash";
 
-type bodyType = "JSON" | "QUERY" | "RAW";
+type bodyType = "JSON" | "URL_ENCODED" | "RAW";
 
-const requestHeaderLine = "#####";
+const REQUEST_BEGIN = "#####";
 
 const requireIsObject = (obj: Record<string, any>, message: string): void => {
     if (!isPlainObject(obj)) {
@@ -13,7 +13,7 @@ const requireIsObject = (obj: Record<string, any>, message: string): void => {
 }
 
 const bodiTypes: Record<string, bodyType> = {
-    "application/x-www-form-urlencoded": "QUERY",
+    "application/x-www-form-urlencoded": "URL_ENCODED",
     "application/json": "JSON",
 };
 
@@ -24,15 +24,7 @@ const getBodyType = (request: HttpRequest): bodyType => {
 
 const toUrlEncode = (body: any): string => {
     requireIsObject(body, "unable to convert body to urlencoded format");
-    const buff = new StringBuilder();
-    for (const k in body) {
-        buff.append(`${k}=${body[k]}\n&`);
-    }
-    const result = buff.toString();
-    if (result.endsWith("\n&")) {
-        return result.slice(0, -2);
-    }
-    return result;
+    return Object.entries(body).map(o => `${o[0]}=${o[1]}`).join("\n&");
 };
 
 const toJson = (body: any): string => {
@@ -47,11 +39,11 @@ const bodyConverters: Record<string, (body: any) => string> = {
 
 const getHeaderValue = (request: HttpRequest, headerName: string): string | undefined => request.headers.find(h => h.name === headerName)?.value;
 
-const getHeaders = (request: HttpRequest): string => request.headers.map(h => `${h.name}: ${h.value}`).join("\n");
+const getHeaders = (request: HttpRequest): string => `${request.headers.map(h => `${h.name}: ${h.value}`).join("\n")}\n\n`;
 
 const getParams = (request: HttpRequest): string => {
     const params = request?.params?.map(p => `${p.name}=${p.value}`).join("\n&") || "";
-    return params.length > 0 ? `?${params}` : params;
+    return params.length > 0 ? `?${params}\n` : params;
 }
 
 const getName = (request: HttpRequest): string => `# @name ${request.name}`;
@@ -66,14 +58,12 @@ const getBody = (request: HttpRequest): string => {
 }
 
 const toString = (request: HttpRequest): string => {
-    const result = new StringBuilder(requestHeaderLine);
+    const result = new StringBuilder(REQUEST_BEGIN);
     result.appendLine(getName(request))
-        .append(request.verb, " ")
-        .append(getURL(request))
-        .appendLine(getParams(request))
-        .appendLine(getHeaders(request))
-        .appendLine()
-        .appendLine(getBody(request));
+        .append(request.verb, " ", getURL(request), "\n")
+        .append(getParams(request))
+        .append(getHeaders(request))
+        .append(getBody(request));
     return result.toString()
 };
 
